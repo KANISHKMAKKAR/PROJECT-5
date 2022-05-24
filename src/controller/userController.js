@@ -8,8 +8,11 @@ let saltRounds = 10
 
 const isValid = function (obj, err, err2) {
     for (let i in obj) {
-        if (typeof obj[i] === 'undefined' || obj[i] === null) return err ? err.replace("xvarx", i) : i
-        if (typeof obj[i] !== 'string' || obj[i].trim().length === 0) return err2 ? err2.replace("xvarx", i) : i
+        if (typeof obj[i] === 'undefined' || obj[i] === null)
+            return err ? err.replace("xvarx", i) : i
+
+        if (typeof obj[i] !== 'string' || obj[i].trim().length === 0)
+            return err2 ? err2.replace("xvarx", i) : i
     }
 }
 const hasValidObj = (obj, err, err2) => {
@@ -20,7 +23,6 @@ const hasValidObj = (obj, err, err2) => {
         if ({}.toString.call(obj[i]) != "[object Object]")
             return err2 ? err2.replace("xvarx", i) : i
     }
-
 }
 
 const isValidRequestBody = function (requestBody) {
@@ -40,43 +42,43 @@ const isValidfiles = function (files) {
 
 const createUser = async function (req, res) {
 
-    const requestBody = req.body
-    if (!isValidRequestBody(requestBody))
+    if (!isValidRequestBody(req.body))
         return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
-    requestBody.data = JSON.parse(requestBody.data)
-
-    const { fname, lname, email, phone, password, address } = requestBody.data
+    const { fname, lname, email, phone, password, address } = JSON.parse(req.body.data)
 
     const files = req.files
 
     if (!isValidfiles(files))
         return res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
-    let isObject, billing, shipping;
-    let mandatory = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
-    if (!mandatory)
-        isObject = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
 
-    if (!mandatory && !isObject)
-        shipping = isValid({ "street": address.shipping.street, "city": address.shipping.city, pincode: address.shipping.pincode }, `Please provide xvarx in shipping address`, `xvarx in shipping address should be a string and non-empty`)
+    let msg = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
+    if (!msg)
+        msg = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
 
-    if (!mandatory && !isObject && !shipping)
-        billing = isValid({ "street": address.billing.street, "city": address.billing.city, pincode: address.billing.pincode }, `Please provide xvarx in billing address`, `xvarx in billing address should be a string and non-empty`)
+    if (!msg)
+        msg = isValid({ "street": address.shipping.street, "city": address.shipping.city, pincode: address.shipping.pincode }, `Please provide xvarx in shipping address`, `xvarx in shipping address should be a string and non-empty`)
 
-    result = mandatory || isObject || shipping || billing
-    if (result)
-        return res.status(400).send({ status: false, Message: result })
+    if (!msg)
+        msg = isValid({ "street": address.billing.street, "city": address.billing.city, pincode: address.billing.pincode }, `Please provide xvarx in billing address`, `xvarx in billing address should be a string and non-empty`)
+
+    const reg = /^\d{6}$/
+    if (!msg && (reg.test(address.shipping.pincode.trim()) || reg.test(address.billing.pincode.trim())))
+        msg = `pincode should be six digit long`
 
     // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
 
-    if (!(validator.isEmail(email.trim())))
-        return res.status(400).send({ status: false, msg: 'enter valid email' })
+    if (!msg && !(validator.isEmail(email.trim())))
+        msg = 'enter valid email'
 
-    if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone)))
-        return res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
+    if (!msg && !(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone)))
+        msg = `phone no should be a valid phone no`
 
-    if (!isValidPassword(password))
-        return res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
+    if (!msg && !isValidPassword(password))
+        msg = "Please provide a vaild password ,Password should be of 8 - 15 characters"
+
+    if (msg)
+        return res.status(400).send({ status: false, message: msg })
 
     // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
 
