@@ -1,12 +1,14 @@
-const express=require("express")
-const userController = require("../controller/user")
-const router=express.Router()
+const express = require('express');
 
-router.get("/test",(req,res)=>{
-  console.log("group46")
-})
-
-router.post("/register",userController.userCreate)
+const userController = require('../controller/userController')
+const middleware = require('../middleware/authentication')
+const router = express.Router();
 
 
-module.exports=router
+//  first feature apis
+
+router.post("/register", userController.createUser);
+
+router.post("/login", userController.doLogin);
+
+module.exports = router;

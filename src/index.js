@@ -1,27 +1,35 @@
-require('dotenv').config()
-const express= require('express')
-const bodyParser=require('body-parser')
-const app=express()
-const multer= require("multer");
-//const { AppConfig } = require('aws-sdk');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const route = require('./routes/route.js');
+const mongoose = require('mongoose');
+const multer = require('multer')
 
-const route=require("../src/routes/route")
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const mongoose=require('mongoose')
 
-app.use(bodyParser.json())
-app.use( multer().any())
+app.use(multer().any())
 
-mongoose.connect('mongodb+srv://functionup-uranium-cohort:q8znVj4ly0Fp0mpU@cluster0.0wdvo.mongodb.net/group46Database',
+mongoose.connect("mongodb+srv://functionup-uranium-cohort:q8znVj4ly0Fp0mpU@cluster0.0wdvo.mongodb.net/group46Database",
 {
-    useNewUrlParser:true
+    useNewUrlParser: true
 })
-.then(()=>console.log('Mongo Db Is Connected'))
-.catch(err=>console.log(err))
-app.use('/',route)
+.then( () => console.log("MongoDb is connected"))
+.catch ( err => console.log(err) );
 
+app.use(
+    function (req,res,next)
+    {
+        const date = new Date();
+        let currDateAndTime = date.toString();
+        console.log(currDateAndTime,',',req.ip,',',req.method,',',req.path);
+        next();
+    }
+);
 
+app.use('/',route);
 
-app.listen(process.env.PORT||3000,function(){
-    console.log('Running on Port 3000')
-})
+app.listen(process.env.PORT || 3000, (err)=> {
+    console.log("Connected to PORT 3000")
+});
