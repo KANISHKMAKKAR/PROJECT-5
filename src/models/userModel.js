@@ -1,9 +1,9 @@
 const mongoose=require('mongoose')
 
 const createUser = new mongoose.Schema({
-    fname: {type:String,required: true},
-  lname: {type:String,required: true},
-  email: {type:String,required:true,unique:true},
+    fname: {type:String,required: true,trim:true},
+  lname: {type:String,required: true,trim:true},
+  email: {type:String,required:true,unique:true,trim:true},
   profileImage: {type:String, required:true}, // s3 link
   phone: {type:String,required:true,unique:true}, //valid mobile no
   password: {type:String,required: true, minlength:8, maxlength: 15}, // encrypted password
