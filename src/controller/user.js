@@ -2,7 +2,7 @@ const userModel=require('../models/userModel')
 
 const userCreate=  async(req,res) => {
     try{
-        req.body.address=JSON.parse(req.body.address)
+      let {fname,lname,email,phone,password,address}=req.body
 let create=await userModel.create(req.body)
 res.send({data:create})
 }catch(err){
