@@ -30,6 +30,7 @@ const createUser = async function (req, res) {
     try {
 
         const requestBody = JSON.parse(req.body.data)
+        console.log(requestBody)
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
             return
@@ -38,6 +39,7 @@ const createUser = async function (req, res) {
         const { fname, lname, email, phone, password, address } = requestBody
 
         const files = req.files
+        
         if (!isValidfiles(files)) {
             res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
             return
@@ -63,7 +65,7 @@ const createUser = async function (req, res) {
             return
         }
         if (!isValid(address)) {
-            res.status(400).send({ status: false, Message: "Please provide password" })
+            res.status(400).send({ status: false, Message: "Please provide address" })
             return
         }
         if (address) {
@@ -81,6 +83,9 @@ const createUser = async function (req, res) {
                     return
                 }
             }
+            else{
+                return res.status(400).send({ status: false, Message: "Please provide shipping address and it should be present in object with all mandatory fields" })
+            }
             if (address.billing) {
                 if (!isValid(address.billing.street)) {
                     res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
@@ -94,6 +99,9 @@ const createUser = async function (req, res) {
                     res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
                     return
                 }
+            }
+            else{
+                return res.status(400).send({ status: false, Message: "Please provide billing address and it should be present in object with all mandatory fields" })
             }
         }
 
@@ -114,11 +122,11 @@ const createUser = async function (req, res) {
 
         // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
 
-        let Email = email.split(' ').join('')
+        //let Email = email.split(' ').join('')
 
-        const isEmailAlreadyUsed = await userModel.findOne({ email: Email });
+        const isEmailAlreadyUsed = await userModel.findOne({ email });
         if (isEmailAlreadyUsed) {
-            res.status(400).send({ status: false, message: `${Email} email address is already registered` })
+            res.status(400).send({ status: false, message: `email address is already registered` })
             return
         }
 
@@ -132,12 +140,11 @@ const createUser = async function (req, res) {
 
         const profilePicture = await uploadFile(files[0])
 
-        const encryptedPassword = await bcrypt.hash(password, saltRounds)
+         const encryptedPassword = await bcrypt.hash(password, saltRounds)
 
-        let FEmail = email.split(' ').join('')
-
+        
         const userData = {
-            fname: fname, lname: lname, profileImage: profilePicture, email: FEmail,
+            fname: fname, lname: lname,  email: email,profileImage:profilePicture,
             phone, password: encryptedPassword, address: address
         }
 
