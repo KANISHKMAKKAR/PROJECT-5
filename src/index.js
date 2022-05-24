@@ -1,4 +1,4 @@
-require("dotenv").config()
+require('dotenv').config()
 const express= require('express')
 const bodyParser=require('body-parser')
 const app=express()
@@ -12,7 +12,7 @@ const mongoose=require('mongoose')
 app.use(bodyParser.json())
 app.use( multer().any())
 
-mongoose.connect(process.env.DATABASE,
+mongoose.connect('mongodb+srv://functionup-uranium-cohort:q8znVj4ly0Fp0mpU@cluster0.0wdvo.mongodb.net/group46Database',
 {
     useNewUrlParser:true
 })
@@ -22,6 +22,6 @@ app.use('/',route)
 
 
 
-app.listen(process.env.PORT,function(){
+app.listen(process.env.PORT||3000,function(){
     console.log('Running on Port 3000')
 })
