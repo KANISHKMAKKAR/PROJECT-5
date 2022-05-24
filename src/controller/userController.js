@@ -6,11 +6,23 @@ const jwt = require('jsonwebtoken')
 let saltRounds = 10
 //------------------------------- validation functions ---------------------------------------------------------------------------------
 
-const isValid = function (value) {
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
+const isValid = function (obj, err, err2) {
+    for (let i in obj) {
+        if (typeof obj[i] === 'undefined' || obj[i] === null) return err ? err.replace("xvarx", i) : i
+        if (typeof obj[i] !== 'string' || obj[i].trim().length === 0) return err2 ? err2.replace("xvarx", i) : i
+    }
 }
+const hasValidObj = (obj, err, err2) => {
+    for (let i in obj) {
+        if (typeof obj[i] === 'undefined' || obj[i] === null)
+            return err ? err.replace("xvarx", i) : i
+
+        if ({}.toString.call(obj[i]) != "[object Object]")
+            return err2 ? err2.replace("xvarx", i) : i
+    }
+
+}
+
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
 }
@@ -27,136 +39,66 @@ const isValidfiles = function (files) {
 //------------------------ first api to create user -----------------------------------------------------------------------------------------
 
 const createUser = async function (req, res) {
-    try {
 
-        const requestBody = req.body
-        console.log(requestBody)
-        if (!isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
-            return
-        }
-        requestBody.data = JSON.parse(requestBody.data)
+    const requestBody = req.body
+    if (!isValidRequestBody(requestBody))
+        return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
-        const { fname, lname, email, phone, password, address } = requestBody.data
+    requestBody.data = JSON.parse(requestBody.data)
 
-        const files = req.files
+    const { fname, lname, email, phone, password, address } = requestBody.data
 
-        if (!isValidfiles(files)) {
-            res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
-            return
-        }
-        if (!isValid(fname)) {
-            res.status(400).send({ status: false, Message: "Please provide user's first name" })
-            return
-        }
-        if (!isValid(lname)) {
-            res.status(400).send({ status: false, Message: "Please provide user's last name" })
-            return
-        }
-        if (!isValid(email)) {
-            res.status(400).send({ status: false, Message: "Please provide user's email" })
-            return
-        }
-        if (!isValid(phone)) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild phone number" })
-            return
-        }
-        if (!isValid(password)) {
-            res.status(400).send({ status: false, Message: "Please provide password" })
-            return
-        }
-        if (!isValid(address)) {
-            res.status(400).send({ status: false, Message: "Please provide address" })
-            return
-        }
-        if (address) {
-            if (address.shipping) {
-                if (!isValid(address.shipping.street)) {
-                    res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
-                    return
-                }
-                if (!isValid(address.shipping.city)) {
-                    res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
-                    return
-                }
-                if (!isValid(address.shipping.pincode)) {
-                    res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
-                    return
-                }
-            }
-            else {
-                res.status(400).send({ status: false, Message: "Please provide shipping address and it should be present in object with all mandatory fields" })
-            }
-            if (address.billing) {
-                if (!isValid(address.billing.street)) {
-                    res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
-                    return
-                }
-                if (!isValid(address.billing.city)) {
-                    res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
-                    return
-                }
-                if (!isValid(address.billing.pincode)) {
-                    res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
-                    return
-                }
-            }
-            else {
-                res.status(400).send({ status: false, Message: "Please provide billing address and it should be present in object with all mandatory fields" })
-            }
-        }
+    const files = req.files
 
-        // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
+    if (!isValidfiles(files))
+        return res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
+    let isObject, billing, shipping;
+    let mandatory = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
+    if (!mandatory)
+        isObject = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
 
+    if (!mandatory && !isObject)
+        shipping = isValid({ "street": address.shipping.street, "city": address.shipping.city, pincode: address.shipping.pincode }, `Please provide xvarx in shipping address`, `xvarx in shipping address should be a string and non-empty`)
 
-        if (!(validator.isEmail(email.trim()))) {
-            return res.status(400).send({ status: false, msg: 'enter valid email' })
-        }
-        if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))) {
-            res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
-            return
-        }
-        if (!isValidPassword(password)) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
-            return
-        }
+    if (!mandatory && !isObject && !shipping)
+        billing = isValid({ "street": address.billing.street, "city": address.billing.city, pincode: address.billing.pincode }, `Please provide xvarx in billing address`, `xvarx in billing address should be a string and non-empty`)
 
-        // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
+    result = mandatory || isObject || shipping || billing
+    if (result)
+        return res.status(400).send({ status: false, Message: result })
 
-      
+    // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
 
-        const isEmailAlreadyUsed = await userModel.findOne({ email });
-        if (isEmailAlreadyUsed) {
-            res.status(400).send({ status: false, message: `email address is already registered` })
-            return
-        }
+    if (!(validator.isEmail(email.trim())))
+        return res.status(400).send({ status: false, msg: 'enter valid email' })
 
-        const isPhoneAlreadyUsed = await userModel.findOne({ phone: phone });
-        if (isPhoneAlreadyUsed) {
-            res.status(400).send({ status: false, message:'phone is already registered' })
-            return
-        }
+    if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone)))
+        return res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
 
-        //--------------------validation ends -------------------------------------------------------------------------------------------------------------
+    if (!isValidPassword(password))
+        return res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
 
-        const profilePicture = await uploadFile(files[0])
+    // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
 
-        const encryptedPassword = await bcrypt.hash(password, saltRounds)
+    const isEmailAlreadyUsed = await userModel.findOne({ email });
+    if (isEmailAlreadyUsed)
+        return res.status(400).send({ status: false, message: `email address is already registered` })
 
+    const isPhoneAlreadyUsed = await userModel.findOne({ phone: phone });
+    if (isPhoneAlreadyUsed)
+        return res.status(400).send({ status: false, message: 'phone is already registered' })
 
-        const userData = {
-            fname: fname, lname: lname, email: email, profileImage: profilePicture,
-            phone, password: encryptedPassword, address: address
-        }
+    //--------------------validation ends -------------------------------------------------------------------------------------------------------------
 
-        const newUser = await userModel.create(userData);
+    const profilePicture = await uploadFile(files[0])
 
-        res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
+    const encryptedPassword = await bcrypt.hash(password, saltRounds)
 
-    }
-    catch (error) {
-        res.status(500).send({ status: false, Message: error.message })
-    }
+    const userData = { fname, lname, email, profileImage: profilePicture, phone, password: encryptedPassword, address }
+
+    const newUser = await userModel.create(userData);
+
+    res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
 }
 
 // ============================ second login api =============================================================================================
