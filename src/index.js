@@ -18,15 +18,15 @@ mongoose.connect("mongodb+srv://functionup-uranium-cohort:q8znVj4ly0Fp0mpU@clust
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) );
 
-app.use(
-    function (req,res,next)
-    {
-        const date = new Date();
-        let currDateAndTime = date.toString();
-        console.log(currDateAndTime,',',req.ip,',',req.method,',',req.path);
-        next();
-    }
-);
+// app.use(
+//     function (req,res,next)
+//     {
+//         const date = new Date();
+//         let currDateAndTime = date.toString();
+//         console.log(currDateAndTime,',',req.ip,',',req.method,',',req.path);
+//         next();
+//     }
+// );
 
 app.use('/',route);
 
