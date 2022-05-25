@@ -5,15 +5,18 @@ const{authentication,authorization}=require('../middleware/authentication')
 
 const router = express.Router();
 
-const handler = fn =>(req,res,next)=> Promise.resolve(fn(req,res,next)).catch((error)=>catcher(error,req,res,next))
-function catcher(err,req,res,next)
-{
-    res.status(500).send({status:false,msg:err.message})
+const errHandler = fn =>async (req,res,next)=> {
+    try {
+       await fn(req,res,next)
+    }
+    catch(error){
+        res.status(500).send({status:false,msg:error.message})
+    }
 }
 
 //  first feature apis
 
-router.post("/register",handler(createUser));
+router.post("/register",errHandler(createUser));
 
 router.post("/login",doLogin );
 

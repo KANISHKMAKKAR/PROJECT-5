@@ -56,15 +56,21 @@ const createUser = async function (req, res) {
     if (!msg)
         msg = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
 
-    if (!msg)
-        msg = isValid({ "street": address.shipping.street, "city": address.shipping.city, pincode: address.shipping.pincode }, `Please provide xvarx in shipping address`, `xvarx in shipping address should be a string and non-empty`)
 
-    if (!msg)
-        msg = isValid({ "street": address.billing.street, "city": address.billing.city, pincode: address.billing.pincode }, `Please provide xvarx in billing address`, `xvarx in billing address should be a string and non-empty`)
 
-    const reg = /^\d{6}$/
-    if (!msg && (reg.test(address.shipping.pincode.trim()) || reg.test(address.billing.pincode.trim())))
-        msg = `pincode should be six digit long`
+    if (!msg) {
+        const { shipping: { street: sStreet, city: sCity, pincode: sPincode }, billing: { street: bStreet, city: bCity, pincode: bPincode } } = address
+
+        msg = isValid({ "street": sStreet, "city": sCity, pincode: sPincode }, `Please provide xvarx in shipping address`, `xvarx in shipping address should be a string and non-empty`)
+
+        if (!msg)
+            msg = isValid({ "street": bStreet, "city": bCity, pincode: bPincode }, `Please provide xvarx in billing address`, `xvarx in billing address should be a string and non-empty`)
+
+        const reg = /^\d{6}$/
+        if (!msg && !(reg.test(sPincode.trim()) && reg.test(bPincode.trim())))
+            msg = `pincode should be six digit long`
+    }
+
 
     // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
 
