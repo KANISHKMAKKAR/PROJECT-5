@@ -1,0 +1,1 @@
+let productModel = require('../model/productModel')

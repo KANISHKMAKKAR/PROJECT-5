@@ -4,26 +4,10 @@ const bcrypt = require('bcrypt')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
 let saltRounds = 10
-//------------------------------- validation functions ---------------------------------------------------------------------------------
+let {isValid,isvalidaddress,isvalidPincode,isValidPassword,isValidRequestBody,isValidfiles} = require('../validators/validator')
 
-const isValid = function (value) {
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
-}
-let isvalidaddress = (value) => ({}.toString.call(value) == '[object Object]') ? true : false
-const isValidRequestBody = function (requestBody) {
-    return Object.keys(requestBody).length > 0
-}
-const isvalidPincode = (value) => ({}.toString.call(value) == '[object Number]') ? true : false
-const isValidPassword = function (password) {
-    if (password.length > 7 && password.length < 16)
-        return true
-}
-const isValidfiles = function (files) {
-    if (files && files.length > 0)
-        return true
-}
+
+
 
 
 //------------------------ first api to create user -----------------------------------------------------------------------------------------
@@ -314,7 +298,7 @@ const updateuser = async (req, res) => {
 
     let find = await userModel.findByIdAndUpdate(userId, { ...userData }, {new: true})
    
-    res.status(200).send({ status: false, message: "Success", data: find })
+    res.status(200).send({status:false,message:"Success",data:find})
 }
 
 
