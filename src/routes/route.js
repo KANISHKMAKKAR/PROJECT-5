@@ -1,4 +1,5 @@
 const express = require('express');
+const { newProduct } = require('../controller/productController');
 const { createUser, doLogin, getdetails,updateuser } = require('../controller/userController');
 const{authentication,authorization}=require('../middleware/authentication')
 
@@ -18,6 +19,6 @@ router.put('/user/:userId/profile',authentication,authorization,updateuser)
 
 // Product api's
 
-router.post('/products')
+router.post('/products',newProduct)
 
 module.exports = router;
