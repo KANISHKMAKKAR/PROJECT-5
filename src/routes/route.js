@@ -5,7 +5,7 @@ const{authentication,authorization}=require('../middleware/authentication')
 
 const router = express.Router();
 
-const errHandler = fn =>async (req,res,next)=> {
+const errHandler = (fn) =>async (req,res,next)=> {
     try {
        await fn(req,res,next)
     }
@@ -18,7 +18,7 @@ const errHandler = fn =>async (req,res,next)=> {
 
 router.post("/register",errHandler(createUser));
 
-router.post("/login",doLogin );
+router.post("/login",doLogin);
 
 router.get('/user/:userId/profile',authentication,authorization,errHandler(getdetails))
 

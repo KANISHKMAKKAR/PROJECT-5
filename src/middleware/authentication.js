@@ -36,7 +36,7 @@ const authorization = async (req, res, next) => {
             return res.status(403).send({ status: false, message: "YOU are not authorized" })
         }
 
-        let user=await userModel.findOne({_id:userId,isDeleted:false})
+        let user=await userModel.findById(userId)
         if(!user){
             return res.status(404).send({status:false,message:"User not found"})
         }

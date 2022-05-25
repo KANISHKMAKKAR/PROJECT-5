@@ -7,7 +7,7 @@ let saltRounds = 10
 //------------------------------- validation functions ---------------------------------------------------------------------------------
 
 const isValid = function (obj, err, err2) {
-    for (let i in obj) {
+    for (let i in obj) {   
         if (typeof obj[i] === 'undefined' || obj[i] === null)
             return err ? err.replace("xvarx", i) : i
 
@@ -20,10 +20,10 @@ const hasValidObj = (obj, err, err2) => {
         if (typeof obj[i] === 'undefined' || obj[i] === null)
             return err ? err.replace("xvarx", i) : i
 
-        if ({}.toString.call(obj[i]) != "[object Object]")
+        if ({}.toString.call(obj[i]) != "[object Object]")   
             return err2 ? err2.replace("xvarx", i) : i
     }
-}
+} 
 
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
@@ -59,7 +59,10 @@ const createUser = async function (req, res) {
         msg = "only png,jpg,jpeg files are allowed from profileImage"
 
     if (!msg)
-        msg = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
+        msg = isValid(
+        { "first name": fname, "last name": lname, email, "phone number": phone, password }, 
+        `Please provide user's  xvarx `, 
+        `xvarx should be a  String and non-empty`)
     if (!msg)
         msg = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
 
@@ -162,7 +165,7 @@ const doLogin = async function (req, res) {
 const getdetails = async (req, res) => 
         res.status(200).send({ status: true, message: "Success", data: req.userData })
 
-        
+
 const updateuser = async (req, res) => {
     let userId = req.params.userId
     if (!isValidRequestBody(req.body)) {
