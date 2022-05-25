@@ -65,7 +65,7 @@ const createUser = async function (req, res) {
                     res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
                     return
                 }
-                if (!isValid(address.shipping.pincode)) {
+                if (!isvalidPincode(address.shipping.pincode)) {
                     res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
                     return
                 }
@@ -82,7 +82,7 @@ const createUser = async function (req, res) {
                     res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
                     return
                 }
-                if (!isValid(address.billing.pincode)) {
+                if (!isvalidPincode(address.billing.pincode)) {
                     res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
                     return
                 }
