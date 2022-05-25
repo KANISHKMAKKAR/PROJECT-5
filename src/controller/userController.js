@@ -48,15 +48,20 @@ const createUser = async function (req, res) {
     const { fname, lname, email, phone, password, address } = JSON.parse(req.body.data)
 
     const files = req.files
-
+    let msg;
     if (!isValidfiles(files))
-        return res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
+        msg = "Please provide user's profile picture"
 
-    let msg = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
+    if (!msg && (files.length > 1 || files[0].fieldname != "profileImage"))
+        msg = `Only One profileImage is allowed by the field name profileImage, no any other file or field allowed `
+
+    if (!msg && !["image/png", "image/jpeg"].includes(files[0].mimetype))
+        msg = "only png,jpg,jpeg files are allowed from profileImage"
+
+    if (!msg)
+        msg = isValid({ "first name": fname, "last name": lname, email, "phone number": phone, password, }, `Please provide user's  xvarx `, `xvarx should be a  String and non-empty`)
     if (!msg)
         msg = hasValidObj({ "user's": address, "shipping": address?.shipping, "billing": address?.billing }, `xvarx address is mandatory`, " xvarx address should have data as an object form")
-
-
 
     if (!msg) {
         const { shipping: { street: sStreet, city: sCity, pincode: sPincode }, billing: { street: bStreet, city: bCity, pincode: bPincode } } = address
@@ -154,15 +159,10 @@ const doLogin = async function (req, res) {
     }
 };
 
-const getdetails = async (req, res) => {
-    try {
-        let userId = req.params.userId
-        let user = await userModel.findById(userId)
-        res.status(200).send({ status: true, message: "Success", data: user })
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
+const getdetails = async (req, res) => 
+        res.status(200).send({ status: true, message: "Success", data: req.userData })
+
+        
 const updateuser = async (req, res) => {
     let userId = req.params.userId
     if (!isValidRequestBody(req.body)) {

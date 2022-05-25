@@ -20,7 +20,7 @@ router.post("/register",errHandler(createUser));
 
 router.post("/login",doLogin );
 
-router.get('/user/:userId/profile',authentication,authorization,getdetails)
+router.get('/user/:userId/profile',authentication,authorization,errHandler(getdetails))
 
 router.put('/user/:userId/profile',authentication,authorization,updateuser)
 

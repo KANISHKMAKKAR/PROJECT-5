@@ -32,14 +32,17 @@ const authorization = async (req, res, next) => {
             return res.status(400).send({status:false,message:"Invalid userID"})
         }
         
-        let user=await userModel.findById(userId)
+        if (req.userId != userId) {
+            return res.status(403).send({ status: false, message: "YOU are not authorized" })
+        }
+
+        let user=await userModel.findOne({_id:userId,isDeleted:false})
         if(!user){
             return res.status(404).send({status:false,message:"User not found"})
         }
         
-        if (req.userId != userId) {
-            return res.status(403).send({ status: false, message: "YOU are not authorized" })
-        }
+        req.userData = user;
+        
         next()
     } catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
