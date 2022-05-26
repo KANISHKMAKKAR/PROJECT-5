@@ -1,6 +1,6 @@
 let productModel = require('../model/productModel')
 let uploadFile = require('../controller/awsController')
-let { isValid, isvalidaddress, isvalidPincode, isValidPassword, isValidRequestBody, isValidfiles ,isValid2,isBoolean} = require('../validators/validator')
+let { isValid, isvalidaddress, isvalidPincode, isValidPassword, isValidRequestBody, isValidfiles, isValid2, isBoolean } = require('../validators/validator')
 const currencySymbol = require("currency-symbol")
 const { default: mongoose } = require('mongoose')
 const { AppSync } = require('aws-sdk')
@@ -90,107 +90,106 @@ let getByIDProduct = async (req, res) => {
 
 let updateByIDProduct = async (req, res) => {
 
-    const productId = req.params.productId;
+    try {
+        const productId = req.params.productId;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) 
-        return res.status(400).send({ status: false, message: "INVALID PRODUCT ID" });
+        if (!mongoose.Types.ObjectId.isValid(productId))
+            return res.status(400).send({ status: false, message: "INVALID PRODUCT ID" });
 
-    let requestBody = req.body
-    if (!isValidRequestBody(requestBody)) 
-        return  res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
+        let requestBody = req.body
+        if (!isValidRequestBody(requestBody))
+            return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
-    const product ={}
-    let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments ,productImage} = requestBody
-    let files = req.files
-    
-    if(productImage!=undefined)
-    return res.status(400).send({status:false,message:"Product Image should have image file"})
+        const product = {}
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage } = requestBody
+        let files = req.files
 
-    if (title || title=="") {
-        if (!isValid2(title))
-            return res.status(400).send({ status: false, message: "ADD A VALID TITLE" })
-        let duplicateTitle = await productModel.findOne({ title ,isDeleted:false })
-        if (duplicateTitle) {
-            return res.status(400).send({ status: false, message: "TITLE already present" })
+        if (productImage != undefined)
+            return res.status(400).send({ status: false, message: "Product Image should have image file" })
+
+        if (title || title == "") {
+            if (!isValid2(title))
+                return res.status(400).send({ status: false, message: "ADD A VALID TITLE" })
+            let duplicateTitle = await productModel.findOne({ title, isDeleted: false })
+            if (duplicateTitle) {
+                return res.status(400).send({ status: false, message: "TITLE already present" })
+            }
+            product.title = title;
         }
-        product.title = title;
-    }
 
-    if(description || description=="")
-    {
-        if (!isValid2(description))
-        return res.status(400).send({ status: false, message: "ADD VALID DESCRIPTION" })
-        product.description = description;
-    }
-    
-    if(price)
-    {
-        if (isValid2(price) || !price.trim().match(/^[1-9]\d*(\.\d{1,2})?%?$/))
-        return res.status(400).send({ status: false, message: "ADD VALID PRICE " })
-        product.price=price;
-    }
-    
-    if(currencyId || currencyId=="" )
-    {
-        if (currencyId != "INR")
-        return res.status(400).send({ status: false, message: "ADD VALID CURRENCY, at this time only INR is acceptible" })
-        product.currencyId = currencyId;
-    }
-    
-    if(style || style =="")
-    {
-        if(!isValid2(style))
-        return res.status(400).send({ status: false, message:"please enter valid style"})
-        product.style=style
-    }
-
-    //currencyFormat = "₹"  as during creation we are not getting it user ,so user can't update that also
-
-    if (isFreeShipping || isFreeShipping=="") {
-        isFreeShipping = isBoolean(isFreeShipping)
-        if (isFreeShipping==="error")
-            return res.status(400).send({ status: false, message: "FREE SHIPPING MUST BE A BOOLEAN VALUE either true or false" })
-            product.isFreeShipping=isFreeShipping
-    }
-
-    if(installments|| installments==""){
-        const number = Math.floor(Number(installments))
-        if(isNaN(number) || number!=installments || installments<1)
-       return  res.status(400).send({status:false,message:`installments could have only a +ve number`})
-        product.installments = installments
-
-    }
-
-    if (isValidfiles(files))
-    {       
-        if (files.length > 1 || files[0].fieldname != "productImage")
-        return res.status(400).send({status:false,message:`Only One ProductImage is allowed by the field name productImage, no any other file or field allowed `}) 
-
-    if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
-        return res.status(400).send({status:false,message:"only png,jpg,jpeg files are allowed from productImage"})
-
-        product.productImage = await uploadFile.uploadFile(files[0])
-    }
-    
-
-    if(availableSizes || availableSizes=="")
-    {
-        availableSizes = availableSizes.split(",")
-        for (let i = 0; i < availableSizes.length; i++) {
-            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i]))
-                return res.status(400).send({ status: false, message: "AVAILABLE SIZE CAN BE S,XS,M,X,L,XXL,XL" })
+        if (description || description == "") {
+            if (!isValid2(description))
+                return res.status(400).send({ status: false, message: "ADD VALID DESCRIPTION" })
+            product.description = description;
         }
-        product.availableSizes =availableSizes;
+
+        if (price || price == "") {
+            if (!price.trim().match(/^[1-9]\d*(\.\d{1,2})?%?$/))
+                return res.status(400).send({ status: false, message: "ADD VALID PRICE " })
+            product.price = price;
+        }
+
+        if (currencyId || currencyId == "") {
+            if (currencyId != "INR")
+                return res.status(400).send({ status: false, message: "ADD VALID CURRENCY, at this time only INR is acceptible" })
+            product.currencyId = currencyId;
+        }
+
+        if (style || style == "") {
+            if (!isValid2(style))
+                return res.status(400).send({ status: false, message: "please enter valid style" })
+            product.style = style
+        }
+
+        //currencyFormat = "₹"  as during creation we are not getting it user ,so user can't update that also
+
+        if (isFreeShipping || isFreeShipping == "") {
+            isFreeShipping = isBoolean(isFreeShipping)
+            if (isFreeShipping === "error")
+                return res.status(400).send({ status: false, message: "FREE SHIPPING MUST BE A BOOLEAN VALUE either true or false" })
+            product.isFreeShipping = isFreeShipping
+        }
+
+        if (installments || installments == "") {
+            const number = Math.floor(Number(installments))
+            if (isNaN(number) || number != installments || installments < 1)
+                return res.status(400).send({ status: false, message: `installments could have only a +ve number` })
+            product.installments = installments
+        }
+
+        if (isValidfiles(files)) {
+            if (files.length > 1 || files[0].fieldname != "productImage")
+                return res.status(400).send({ status: false, message: `Only One ProductImage is allowed by the field name productImage, no any other file or field allowed ` })
+
+            if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
+                return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from productImage" })
+
+            product.productImage = await uploadFile.uploadFile(files[0])
+        }
+
+
+        if (availableSizes || availableSizes == "") {
+            availableSizes = availableSizes.split(",")
+            for (let i = 0; i < availableSizes.length; i++) {
+                if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i]))
+                    return res.status(400).send({ status: false, message: "AVAILABLE SIZE CAN BE S,XS,M,X,L,XXL,XL" })
+            }
+            product.availableSizes = availableSizes;
+        }
+
+        const updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, product, { new: true })
+
+        if (!updatedProduct)
+            return res.status(404).send({ status: false, message: "NO PRODUCT FOUND BY THIS ID" })
+
+        res.status(200).send({ status: true, message: "success", data: updatedProduct });
     }
-    
-    const updatedProduct = await productModel.findOneAndUpdate({_id:productId,isDeleted:false},product,{new:true})
-
-    if(!updatedProduct)
-    return res.status(404).send({ status: false, message: "NO PRODUCT FOUND BY THIS ID" })
-
-    res.status(200).send({ status: true, message: "success", data: updatedProduct });
-
+    catch (error) {
+        res.status(400).send({ status: false, message: error.message })
+    }
 }
+
+
 let deleteByIDProduct = async (req, res) => {
     try {
         const productId = req.params.productId;
