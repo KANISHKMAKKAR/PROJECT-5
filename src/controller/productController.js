@@ -34,7 +34,7 @@ let newProduct = async (req, res) => {
 
         if (isFreeShipping) {
             if (typeof isFreeShipping != Boolean)
-                return res.status(400).send({ status: false, message: "FREE SHIPPING MUST BE A BOOLEAN VALUE" })
+            return res.status(400).send({ status: false, message: "FREE SHIPPING MUST BE A BOOLEAN VALUE" })
         }
         if (!isValidfiles(files))
             return res.status(400).send({ status: false, message: "ADD PRODUCT IMAGE" })
@@ -59,8 +59,34 @@ let newProduct = async (req, res) => {
     }
 }
 
-let getProducts = (req, res) => {
+let getProducts =async (req, res) => {
+    try{
+    const{Size,name,priceGreaterThan,priceLessThan}=req.query
+     let filters={}
 
+     if(isValid(Size)){
+     filters["availableSizes"]={$all : Size}
+     }
+     if(isValid(name)){
+        filters["title"]={ "$regex": name, "$options": "i" }
+    }
+    if(isValid(priceGreaterThan)){
+        filters["price"]={ $gt: priceGreaterThan}
+    }
+    if(isValid(priceLessThan)){
+        filters["price"]={ $lt: priceLessThan }
+    }
+    if(Object.keys(filters).length==0){
+         let AllProduct=await productModel.find({ isDeleted:false})
+         res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })//.sort({price:1})
+    }else{
+        filters["isDeleted"]=false
+        let AllProduct=await productModel.find(filters)
+        res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })//.sort({price:1})
+    }
+} catch (err) {
+    return res.status(500).send({ status: false, message: err.message })
+}
 }
 
 
