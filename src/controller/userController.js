@@ -51,7 +51,7 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
-        if (!isValid(address)) {
+        if (!isvalidaddress(address)) {
             res.status(400).send({ status: false, Message: "Please provide address" })
             return
         }
