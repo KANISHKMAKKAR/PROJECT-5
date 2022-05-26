@@ -8,4 +8,20 @@ let newProduct=(req,res)=>{
     res.status(201).send({status:false,message:"Successfully created",data:create})
     
 }
-module.exports={newProduct}
+
+let getProducts=(req,res)=>{
+
+}
+
+
+let getByIDProduct=(req,res)=>{
+
+}
+
+let updateByIDProduct=(req,res)=>{
+
+}
+let deleteByIDProduct=(req,res)=>{
+
+}
+module.exports={newProduct,getProducts,getByIDProduct,updateByIDProduct,deleteByIDProduct}
