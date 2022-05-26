@@ -43,6 +43,7 @@ let newProduct = new mongoose.Schema({
 
     availableSizes: {
         type: [String],
+        required:true,
         enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
     },
 
@@ -58,5 +59,5 @@ let newProduct = new mongoose.Schema({
         default: false
     },
 
-})
+},{timestamps:true})
 module.exports = mongoose.model('Product',newProduct)
