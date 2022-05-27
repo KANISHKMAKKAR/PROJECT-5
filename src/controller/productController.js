@@ -3,7 +3,6 @@ let uploadFile = require('../controller/awsController')
 let { isValid, isvalidaddress, isvalidPincode, isValidPassword, isValidRequestBody, isValidfiles, isValid2, isBoolean } = require('../validators/validator')
 const currencySymbol = require("currency-symbol")
 const { default: mongoose } = require('mongoose')
-const { AppSync } = require('aws-sdk')
 
 
 let newProduct = async (req, res) => {
@@ -14,7 +13,7 @@ let newProduct = async (req, res) => {
 
         if (!isValid(title))
             return res.status(400).send({ status: false, message: "ADD A VALID TITLE" })
-        let duplicateTitle = await productModel.findOne({ title })
+        let duplicateTitle = await productModel.findOne({ title ,isDeleted:false})
         if (duplicateTitle) {
             return res.status(400).send({ status: false, message: "TITLE already present" })
         }
@@ -33,7 +32,9 @@ let newProduct = async (req, res) => {
         currencyFormat = "₹"
 
         if (isFreeShipping) {
-            if (typeof isFreeShipping != Boolean)
+            isFreeShipping = isBoolean(isFreeShipping)
+            console.log(isFreeShipping)
+            if (isFreeShipping=="error" )
                 return res.status(400).send({ status: false, message: "FREE SHIPPING MUST BE A BOOLEAN VALUE" })
         }
         if (!isValidfiles(files))
@@ -52,7 +53,7 @@ let newProduct = async (req, res) => {
         }
         let CREATE = { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage }
         let create = await productModel.create({ ...CREATE })
-        res.status(201).send({ status: false, message: "Successfully created", data: create })
+        res.status(201).send({ status: true, message: "Successfully created", data: create })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
@@ -65,17 +66,24 @@ let getProducts = async (req, res) => {
         let filters = {}
 
         if (isValid(size)) {
-            filters["availableSizes"] = { $all: size }
+            filters["availableSizes"] = { $all: size.toUpperCase().split(",") }
         }
         if (isValid(name)) {
             filters["title"] = { "$regex": name, "$options": "i" }
         }
-        if (isValid(priceGreaterThan)) {
-            filters["price"] = { $gt: priceGreaterThan }
+
+        if (isValid(priceGreaterThan) && isValid(priceLessThan))
+            filters["price"] =  { $gt: priceGreaterThan, $lt: priceLessThan }
+
+        else {
+            if (isValid(priceGreaterThan)) {
+                filters["price"] = { $gt: priceGreaterThan }
+            }
+            if (isValid(priceLessThan)) {
+                filters["price"] = { $lt: priceLessThan }
+            }
         }
-        if (isValid(priceLessThan)) {
-            filters["price"] = { $lt: priceLessThan }
-        }
+
         if (Object.keys(filters).length == 0) {
             let AllProduct = await productModel.find({ isDeleted: false })
             if (AllProduct.length == 0) {
@@ -90,7 +98,7 @@ let getProducts = async (req, res) => {
                 return res.status(404).send({ status: false, message: "NO PRODUCT FOUND" })//.sort({price:1})
             }
 
-            res.status(200).send({ status: true, message: "Success", data:AllProduct })//.sort({price:1})
+            res.status(200).send({ status: true, message: "Success", data: AllProduct })//.sort({price:1})
 
         }
     } catch (err) {

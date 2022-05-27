@@ -9,7 +9,7 @@ const isValid2= (value)=> {
     return true;
 }
 
-let isvalidaddress = (value) => ({}.toString.call(value) == '[object Object]') ? true : false
+let isvalidaddress = (value) => ({}.toString.call(value) == '[object Object]' && Object.keys(value).length>0) ? true : false
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
 }
