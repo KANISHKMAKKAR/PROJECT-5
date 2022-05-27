@@ -137,7 +137,7 @@ const createUser = async function (req, res) {
 
         const newUser = await userModel.create(userData);
 
-        res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
+        res.status(201).send({ status: true, message: `User created successfully`, data: newUser });
 
     }
     catch (error) {
@@ -181,7 +181,7 @@ const doLogin = async function (req, res) {
 
             res.header('x-api-key', generatedToken);
 
-            res.status(200).send({ status: true, data: " user  login successfull", userId: userEmail._id, token: { generatedToken } })
+            res.status(200).send({ status: true, data: "User login successful", userId: userEmail._id, token: { generatedToken } })
         } else {
             res.status(400).send({ status: false, msg: "must contain email and password" })
         }
@@ -194,7 +194,7 @@ const getdetails = async (req, res) => {
     try {
         let userId = req.params.userId
         let user = await userModel.findById(userId)
-        res.status(200).send({ status: true, message: "Success", data: user })
+        res.status(200).send({ status: true, message: "User profile details", data: user })
     } catch (err) {
         res.status(500).send({ status: false, message: err.message })
     }
@@ -298,7 +298,7 @@ const updateuser = async (req, res) => {
 
     let find = await userModel.findByIdAndUpdate(userId, { ...userData }, {new: true})
    
-    res.status(200).send({status:false,message:"Success",data:find})
+    res.status(200).send({status:false,message:"User profile updated",data:find})
 }
 
 
