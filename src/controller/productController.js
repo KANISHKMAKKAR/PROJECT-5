@@ -64,14 +64,18 @@ let getProducts = async (req, res) => {
     try {
         const { size, name, priceGreaterThan, priceLessThan } = req.query
         let filters = {}
-
-        if (isValid(size)) {
-            filters["availableSizes"] = { $all: size.toUpperCase().split(",") }
+console.log(size)
+        if (!isValid(size)) {
+            return res.status(400).send({ status: false, message: "WRONG INPUT" })
+            
         }
+        
+        filters.availableSizes = size.split(' ')
+        console.log(filters)
         if (isValid(name)) {
             filters["title"] = { "$regex": name, "$options": "i" }
         }
-
+        console.log(filters)
         if (isValid(priceGreaterThan) && isValid(priceLessThan))
             filters["price"] =  { $gt: priceGreaterThan, $lt: priceLessThan }
 
@@ -94,6 +98,7 @@ let getProducts = async (req, res) => {
         else {
             filters["isDeleted"] = false
             let AllProduct = await productModel.find(filters)
+            console.log(AllProduct)
             if (AllProduct.length == 0) {
                 return res.status(404).send({ status: false, message: "NO PRODUCT FOUND" })//.sort({price:1})
             }
