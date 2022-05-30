@@ -1,6 +1,7 @@
 const cartModel = require('../model/cartModel')
 let productModel = require('../model/productModel')
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const { rawListeners } = require('../model/cartModel');
 
 let AddCart = async (req, res) => {
 
@@ -112,6 +113,7 @@ const changeCart = async (req, res) => {
         cartDeatil.items.splice(index, 1)
       else
         cartDeatil.items[index].quantity -= 1
+
       cartDeatil.totalItems -= 1;
       cartDeatil.totalPrice -= ProductDeatil.price;
     }
@@ -129,7 +131,7 @@ const changeCart = async (req, res) => {
 const getCart = async (req,res) => {
   try {
     let userId = req.params.userId;
-    const cartDeatil = await cartModel.findOne({userId:userId,isDeleted:false})
+    const cartDeatil = await cartModel.findOne({userId:userId})
     if(!cartDeatil)
     return res.status(400).send({status:false,message:"No cart exist with provided userId"})
 
@@ -143,8 +145,9 @@ const getCart = async (req,res) => {
 const deleteCart = async (req,res)=> {
   try {
     let userId = req.params.userId;
-    const cartDetail = await cartModel.findOneAndUpdate({userId:userId,isDeleted:false},{items:[],totalItems:0,totalPrice:0},{new:true})
-
+    const cartDetail = await cartModel.findOneAndUpdate({userId:userId},{items:[],totalItems:0,totalPrice:0},{new:true})
+    if(!cartDetail)
+    res.status(404).send({status:false,message:"No cart found related to provided user id "})
     res.status(200).send({status:true,message:cartDetail})
   }
   catch (error){
