@@ -9,13 +9,10 @@ let AddCart = async (req, res) => {
   let cartDeatil;
   //const product = await cartModel.findOne({ items: { $elemMatch: { productId: productId } } })
 
-  if (!mongoose.isValidObjectId(UserId))
-    return res.status(400).send({ status: false, message: "Invalid userId" })
-
-
   if (cartId) {
     if (!mongoose.isValidObjectId(cartId))
       return res.status(400).send({ status: false, message: "Invalid cartId" })
+      
     cartDeatil = await cartModel.findOne({ _id: cartId, userId: UserId })
     if (!cartDeatil)
       return res.status(404).send({ status: false, message: "No cart found with provided cart Id" })
@@ -63,6 +60,8 @@ let AddCart = async (req, res) => {
 
     } else {
       const product = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: UserId }, { $inc: { "items.$.quantity": 1, totalItems: 1, totalPrice: ProductDeatil.price } }, { new: true })
+
+      
       return res.status(201).send({ status: false, message: "Successfully created", data: product })
     }
   }
@@ -78,8 +77,6 @@ const changeCart = async (req, res) => {
     if (!cartId) {
       return res.status(404).send({ status: false, message: "cartId is mandatory" })
     }
-    if (!mongoose.isValidObjectId(UserId))
-      return res.status(400).send({ status: false, message: "Invalid userId" })
     if (!mongoose.isValidObjectId(cartId))
       return res.status(400).send({ status: false, message: "Invalid cartId" })
 
@@ -129,5 +126,30 @@ const changeCart = async (req, res) => {
   }
 }
 
+const getCart = async (req,res) => {
+  try {
+    let userId = req.params.userId;
+    const cartDeatil = await cartModel.findOne({userId:userId,isDeleted:false})
+    if(!cartDeatil)
+    return res.status(400).send({status:false,message:"No cart exist with provided userId"})
 
-module.exports = { AddCart, changeCart }
+      res.status(200).send({status:false,message:"Success",data:cartDeatil})
+  }
+  catch(error) {
+    res.status(500).send({status:false,message:error.message})
+  }
+}
+
+const deleteCart = async (req,res)=> {
+  try {
+    let userId = req.params.userId;
+    const cartDetail = await cartModel.findOneAndUpdate({userId:userId,isDeleted:false},{items:[],totalItems:0,totalPrice:0},{new:true})
+
+    res.status(200).send({status:true,message:cartDetail})
+  }
+  catch (error){
+ res.status(500).send({status:false,message:error.message})
+  }
+}
+
+module.exports = { AddCart, changeCart,getCart,deleteCart }
