@@ -65,6 +65,9 @@ let getProducts =async (req, res) => {
      let filters={}
 
      if(isValid(Size)){
+         Size=parseInt(Size)
+         console.log(typeof Size)
+         console.log(Size)
      filters["availableSizes"]={$all : Size}
      }
      if(isValid(name)){
@@ -77,12 +80,12 @@ let getProducts =async (req, res) => {
         filters["price"]={ $lt: priceLessThan }
     }
     if(Object.keys(filters).length==0){
-         let AllProduct=await productModel.find({ isDeleted:false})
-         res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })//.sort({price:1})
+         let AllProduct=await productModel.find({ isDeleted:false}).sort({price:1})
+         res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })
     }else{
         filters["isDeleted"]=false
-        let AllProduct=await productModel.find(filters)
-        res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })//.sort({price:1})
+        let AllProduct=await productModel.find(filters).sort({price:1})
+        res.status(201).send({ status: false, message: "Successfully created", data: AllProduct })
     }
 } catch (err) {
     return res.status(500).send({ status: false, message: err.message })
