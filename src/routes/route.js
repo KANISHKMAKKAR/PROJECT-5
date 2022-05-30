@@ -1,4 +1,5 @@
 const express = require('express');
+const { AddCart, changeCart } = require('../controller/cart');
 const { newProduct, getProducts, getByIDProduct, updateByIDProduct, deleteByIDProduct } = require('../controller/productController');
 const { createUser, doLogin, getdetails,updateuser } = require('../controller/userController');
 const{authentication,authorization}=require('../middleware/authentication')
@@ -31,6 +32,8 @@ router.delete('/products/:productId',deleteByIDProduct)
 
 //CART API
 
+router.post("/users/:userId/cart",AddCart)
+router.put("/users/:userId/cart",changeCart)
 
 
 module.exports = router;
