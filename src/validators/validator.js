@@ -13,7 +13,7 @@ let isvalidaddress = (value) => ({}.toString.call(value) == '[object Object]' &&
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
 }
-const isvalidPincode = (value) => ({}.toString.call(value) == '[object Number]') ? true : false
+const isvalidPincode = (value) => (/\d{6}/.test(value.trim())) ? true : false //{}.toString.call(value) == '[object Number]'
 const isValidPassword = function (password) {
     if (password.length > 7 && password.length < 16)
         return true
@@ -26,4 +26,5 @@ const isBoolean = (value) => {
     value = value.toLowerCase()
     return value==="true"?true:(value==="false")?false:"error"
 }
+
 module.exports={isValid,isvalidaddress,isvalidPincode,isValidPassword,isValidRequestBody,isValidfiles,isValid2,isBoolean}
