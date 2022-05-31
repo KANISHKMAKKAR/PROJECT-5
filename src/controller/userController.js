@@ -21,7 +21,10 @@ const createUser = async function (req, res) {
         }
         //  requestBody.data = JSON.parse(requestBody.data)
 
-        const { fname, lname, email, phone, password, address, profileImage } = req.body
+        const { fname, lname, email, phone, password, address, profileImage ,...other} = req.body
+
+        if(isValidRequestBody(other))
+        return res.status(400).send({status:false,message:"Any extra field is not allowed "})
 
         const files = req.files
 
@@ -198,7 +201,25 @@ const updateuser = async (req, res) => {
     if (!isValidRequestBody(req.body)) {
         return res.status(400).send({ status: false, message: "CANT BE EMPTY BODY" })
     }
-    let { fname, lname, email, phone, password, address } = req.body
+    let { fname, lname, email, phone, password, address,profileImage,...other } = req.body
+      
+        if(isValidRequestBody(other))
+        return res.status(400).send({status:false,message:"Any extra field is not allowed for updation"})
+
+    if(profileImage!=undefined)
+        return res.status(400).send({status:false,message:"profileImage field should have a image file"})
+
+        let files = req.files
+
+        if (isValidfiles(files)) {
+            if (files.length > 1 || files[0].fieldname != "profileImage")
+                return res.status(400).send({ status: false, message: `Only One ProfileImage is allowed by the field name profileImage, no any other file or field allowed ` })
+
+            if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
+                return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from profileImage" })
+
+            userData.profileImage = await uploadFile.uploadFile(files[0])
+        }
 
     if (fname || fname == "") {
         if (!isValid2(fname))
