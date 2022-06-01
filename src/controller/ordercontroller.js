@@ -7,10 +7,7 @@ const { isValid } = require('../validators/validator')
 let createOrder = async (req,res)=>{
     let userId=req.params.userId
     let {status,cancellable}=req.body
-    let ORDER =await orderModel.findOne({userId:userId})
-    if(ORDER){
-        return res.status(400).send({status:false,message:"ORDER ALREADY GENERATED"})
-    }
+   
  let cart = await cartModel.findOne({userId:userId})
  if(!cart)
  return res.status(400).send({status:false,message:"EMPTY CART"})
@@ -55,6 +52,7 @@ for(let i=0;i<cart.items.length;i++){
 
  }
  let result = await orderModel.create(order)
+ let emptycart = await cartModel.findOneAndUpdate({userId:userId},{items:[],totalItems:0,totalPrice:0})
 
      res.status(201).send({status:true,message:"Order generated",data:result})
 }
