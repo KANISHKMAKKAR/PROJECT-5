@@ -21,7 +21,7 @@ const createUser = async function (req, res) {
         }
         //  requestBody.data = JSON.parse(requestBody.data)
 
-        const { fname, lname, email, phone, password, address, profileImage ,...other} = req.body
+        let { fname, lname, email, phone, password, address, profileImage ,...other} = req.body
 
         if(isValidRequestBody(other))
         return res.status(400).send({status:false,message:"Any extra field is not allowed "})
@@ -61,15 +61,20 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
+       address=JSON.parse(address)
+      
         if (!isvalidaddress(address)) {
             res.status(400).send({ status: false, Message: "Please provide address, it should contain shipping and billing address" })
             return
         }
         if (address) {
+           
             if (address.shipping) {
-                if (!isValid(address.shipping.street))
+                
+                if (!isValid(address.shipping.street)){
+                  
                     return res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
-
+                }
                 if (!isValid(address.shipping.city))
                     return res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
 
@@ -93,6 +98,7 @@ const createUser = async function (req, res) {
                 return res.status(400).send({ status: false, Message: "Please provide billing address and it should be present in object with all mandatory fields" })
             }
         }
+        
 
         // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
 

@@ -9,7 +9,7 @@ const { rawListeners } = require('../model/cartModel');
 const{isValidRequestBody}=require('../validators/validator')
 
 let AddCart = async (req, res) => {
-
+try{
   let UserId = req.params.userId;
   let { productId, cartId } = req.body;
   let cartDeatil;
@@ -43,7 +43,7 @@ let AddCart = async (req, res) => {
     let cart = await cartModel.create({
       userId: UserId,
       items: [{
-        productId: ProductDeatil.id,
+        productId: ProductDeatil._id,
         quantity: 1
       }],
       totalPrice: ProductDeatil.price,
@@ -52,7 +52,8 @@ let AddCart = async (req, res) => {
     )
     return res.status(201).send({ status: false, message: "Successfully created", data: cart })
   } else {
-    const product = await cartModel.findOne({ items: { $elemMatch: { productId: productId } }, userId: UserId })
+   // const product = await cartModel.findOne({ items: { $elemMatch: { productId: productId } }, userId: UserId })
+const product = cartDeatil.items.find((element)=> element.productId==productId)
 
     if (!product) {
 
@@ -67,11 +68,13 @@ let AddCart = async (req, res) => {
       return res.status(201).send({ status: false, message: "Successfully created", data: cartDeatil })
 
     } else {
-      const product = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: UserId }, { $inc: { "items.$.quantity": 1, totalItems: 1, totalPrice: ProductDeatil.price } }, { new: true })
+      const product = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: UserId }, { $inc: { "items.$.quantity": 1, totalPrice: ProductDeatil.price } }, { new: true })
 
 
       return res.status(201).send({ status: false, message: "Successfully created", data: product })
     }
+  }}catch(err){
+    res.status(500).send({status:false,message:err.message})
   }
 
 }
@@ -116,16 +119,17 @@ const changeCart = async (req, res) => {
     let quantity = cartDeatil.items[index].quantity;
     if (removeProduct == 0) {
       cartDeatil.items.splice(index, 1)
-      cartDeatil.totalItems -= quantity;
+      cartDeatil.totalItems -= 1;
       cartDeatil.totalPrice -= quantity * ProductDeatil.price;
     }
     else {
-      if (quantity == 1)
+      if (quantity == 1){
         cartDeatil.items.splice(index, 1)
+        cartDeatil.totalItems -= 1;}
       else
         cartDeatil.items[index].quantity -= 1
 
-      cartDeatil.totalItems -= 1;
+      
       cartDeatil.totalPrice -= ProductDeatil.price;
     }
 
@@ -157,10 +161,13 @@ const getCart = async (req, res) => {
 const deleteCart = async (req, res) => {
   try {
     let userId = req.params.userId;
-    const cartDetail = await cartModel.findOneAndUpdate({userId:userId},{items:[],totalItems:0,totalPrice:0},{new:true})
+    const cartDetail = await cartModel.findOneAndUpdate({userId:userId},{items:[],totalItems:0,totalPrice:0})
     if(!cartDetail)
-    res.status(404).send({status:false,message:"No cart found related to provided user id "})
-    res.status(200).send({status:true,message:cartDetail})
+   return res.status(404).send({status:false,message:"No cart found related to provided user id "})
+    if(cartDetail.items.length==0){
+      return res.status(400).send({status:false,message:"CART ALREADY DELETED"})
+    }
+    res.status(204).send({status:true,message:"CART DELETED"})
   }
   catch (error) {
     res.status(500).send({ status: false, message: error.message })

@@ -197,7 +197,7 @@ Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
   availableSizes: {array of string, at least one size, enum["S","XS","M","X", "L","XXL", "XL"]},
   installments: {number}//left,
   deletedAt: {Date, when the document is deleted}, 
-  isDeleted: {boolean, default: false},
+  isDeleted: {boolean , default: false},
   createdAt: {timestamp},
   updatedAt: {timestamp},
 }
@@ -358,7 +358,7 @@ Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
 - Make sure the user exist
 - Get order id in request body
 - Make sure the order belongs to the user
-- Make sure that only a cancellable order could be canceled. Else send an appropriate error message and response.
+- Make sure that only a cancellable order could be canceled.Else send an appropriate error message and response.
 - __Response format__
   - _**On success**_ - Return HTTP status 200. Also return the updated order document. The response should be a JSON object like [this](#successful-response-structure)
   - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
