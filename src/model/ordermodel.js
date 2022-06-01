@@ -49,8 +49,8 @@ let newOrder = new mongoose.Schema({
     status:
     {
         type: String,
-        default: 'pending',
-        enum: ['pending', 'completed', 'cancelled']
+        default: "pending",
+        enum: ["pending", "completed", "cancelled"]
     },
 
     deletedAt:

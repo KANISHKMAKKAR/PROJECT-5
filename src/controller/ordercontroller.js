@@ -1,6 +1,7 @@
+const  mongoose = require('mongoose')
 let cartModel = require('../model/cartModel')
 const orderModel = require('../model/ordermodel')
-const { isValid } = require('../validators/validator')
+const { isValid, isValidRequestBody } = require('../validators/validator')
 
 
 
@@ -56,4 +57,46 @@ for(let i=0;i<cart.items.length;i++){
 
      res.status(201).send({status:true,message:"Order generated",data:result})
 }
-module.exports={createOrder}
+
+let updateORder=async (req,res)=>{
+let userId =req.params.userId
+let{orderId,status}=req.body
+
+if(!isValidRequestBody(req.body))
+
+return res.status(400).send({status:false,message:"EMPTY BODY"})
+
+if(!orderId){
+    return res.status(400).send({status:false,message:"ORDER ID IS MANDATORY"})
+}
+if(!mongoose.Types.ObjectId.isValid(orderId)){
+    return res.status(400).send({status:false,message:"NOT A VALID ORDER ID"})
+}
+
+let order = await orderModel.findOne({_id:orderId})
+
+if(!order)
+return res.status(404).send({status:false,message:"NOT FOUND"})
+
+if(!status){
+    return res.status(400).send({status:false,message:"STATUS MANDATORY"})
+}
+if(!["completed","cancelled"].includes(status)){
+    return res.status(400).send({status:false,message:"STATUS CAN BE COMPLETED OR CANCELLED"})
+}
+if(order.userId.toString() !== userId){
+    return res.status(403).send({status:false,message:"USER ID DOES NOT BELONG TO THE GIVEN ORDER ID"})
+}
+if(order.status !== "pending"){
+    return res.status(400).send({status:false,message:"ORDER STATUS IS "+ order.status + " YOU CANNOT UPDATE THIS"})
+}
+if(status ==="cancelled" && order.cancellable==false){
+    return res.status(400).send({status:false,message:"THIS ORDER CAN NOT BE CANCELLED"})
+}
+// if(status==="pending"){
+//     return res.status(400).send({status:false,message:"CANT UPDATE THIS DETAIL"})
+// }
+let update = await orderModel.findOneAndUpdate({_id:orderId},{$set:{status:status,cancellable:false}},{new:true})
+return res.status(200).send({status:true,message:"Updated Successfully",data:update})
+}
+module.exports={createOrder,updateORder}

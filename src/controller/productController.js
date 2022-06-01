@@ -72,12 +72,15 @@ let getProducts = async (req, res) => {
         const { size, name, priceGreaterThan, priceLessThan } = req.query
         let filters = {}
         console.log(size)
+        if(size||size==""){
         if (!isValid(size)) {
             return res.status(400).send({ status: false, message: "WRONG INPUT" })
 
         }
-
+        
         filters.availableSizes = size.split(' ')
+    }
+
         console.log(filters)
         if (isValid(name)) {
             filters["title"] = { "$regex": name, "$options": "i" }
