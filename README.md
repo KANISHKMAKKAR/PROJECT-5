@@ -480,3 +480,34 @@ Refer below sample
   updatedAt: "2021-09-17T04:25:07.803Z",
 }
 ```
+array, string manipulation
+linked list
+stack e.g callstack
+queue
+event loop and its working
+graph
+trees and its types
+tree manipulation and balance
+sudoku balance
+least recent usage cache
+palindrome
+OOPS encapsulation,polymorphism,inheritance,exception handling
+debouncing
+throttling
+
+how function reads a code
+chize line by line queue mai jayegi then check krega sync hai ya async then run krvaya then fir check kra usne sync h ya async then vo same chiz jayegi callstackmai jab sync h read kro O/P do stack clear kro
+jab await vala stack mai jata h stack dekhega data jo h fetch n hua ya zyada time lg ra h to vo dobara se queue mai daldega
+then sra code krdega vo then await vala jo queue mai pda h
+await fir stack mai jayega then stack usko dobara se queue mai bhejdega jba pehle vla await pda hoga tb tk dusra await queue mai pda rahega
+
+
+this keyword VIP
+
+
+
+object or array mai similarity
+array is a special type of object and the values are defined on the basis of indexes 
+
+hoisting
+both type of functions difference
