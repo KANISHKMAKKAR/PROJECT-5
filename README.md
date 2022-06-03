@@ -511,3 +511,4 @@ array is a special type of object and the values are defined on the basis of ind
 
 hoisting
 both type of functions difference
+socket.io

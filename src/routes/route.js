@@ -43,7 +43,9 @@ router.delete("/users/:userId/cart",authentication,authorization,deleteCart)
 
 //ORDER API
 
-router.post("/users/:userId/orders",createOrder)
+router.post("/users/:userId/orders",authentication,authorization,createOrder)
 
-router.put("/users/:userId/orders",updateORder)
+router.put("/users/:userId/orders",authentication,authorization,updateORder)
+
+
 module.exports = router;

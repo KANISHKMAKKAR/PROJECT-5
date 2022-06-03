@@ -6,6 +6,7 @@ const { isValid, isValidRequestBody } = require('../validators/validator')
 
 
 let createOrder = async (req,res)=>{
+    try{
     let userId=req.params.userId
     let {status,cancellable}=req.body
    
@@ -56,9 +57,13 @@ for(let i=0;i<cart.items.length;i++){
  let emptycart = await cartModel.findOneAndUpdate({userId:userId},{items:[],totalItems:0,totalPrice:0})
 
      res.status(201).send({status:true,message:"Order generated",data:result})
+}catch (error) {
+    res.status(500).send({ status: false, message: error.message })
+  }
 }
 
 let updateORder=async (req,res)=>{
+    try{
 let userId =req.params.userId
 let{orderId,status}=req.body
 
@@ -93,10 +98,12 @@ if(order.status !== "pending"){
 if(status ==="cancelled" && order.cancellable==false){
     return res.status(400).send({status:false,message:"THIS ORDER CAN NOT BE CANCELLED"})
 }
-// if(status==="pending"){
-//     return res.status(400).send({status:false,message:"CANT UPDATE THIS DETAIL"})
-// }
+
 let update = await orderModel.findOneAndUpdate({_id:orderId},{$set:{status:status,cancellable:false}},{new:true})
 return res.status(200).send({status:true,message:"Updated Successfully",data:update})
+}
+catch (error) {
+    res.status(500).send({ status: false, message: error.message })
+  }
 }
 module.exports={createOrder,updateORder}
