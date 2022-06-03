@@ -7,14 +7,14 @@ const { default: mongoose } = require('mongoose')
 let newProduct = async (req, res) => {
     try {
         let requestBody = req.body
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments,productImage,...other } = requestBody
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, ...other } = requestBody
         let files = req.files
 
-        if(isValidRequestBody(other))
-        return res.status(400).send({status:false,message:"Any extra field is not allowed for updation"})
+        if (isValidRequestBody(other))
+            return res.status(400).send({ status: false, message: "Any extra field is not allowed for updation" })
 
-        if(isValidRequestBody(other))
-        return res.status(400).send({status:false,message:"Any extra field is not allowed"})
+        if (isValidRequestBody(other))
+            return res.status(400).send({ status: false, message: "Any extra field is not allowed" })
 
         if (!isValid(title))
             return res.status(400).send({ status: false, message: "ADD A VALID TITLE" })
@@ -30,11 +30,14 @@ let newProduct = async (req, res) => {
         if (!price.match(/^[1-9]\d{0,9}(\.\d{1,3})?%?$/))
             return res.status(400).send({ status: false, message: "ADD VALID PRICE" })
 
-        if (currencyId != "INR")
+        if (!(currencyId == "INR" ||currencyId =="USD"))
             return res.status(400).send({ status: false, message: "ADD VALID CURRENCY" })
-
-
-        currencyFormat = "₹"
+        if (currencyId == "INR") {
+            currencyFormat = "₹"
+        }
+        else if (currencyId == "USD") {
+            currencyFormat = "$"
+        }
 
         if (isFreeShipping) {
             isFreeShipping = isBoolean(isFreeShipping)
@@ -50,10 +53,10 @@ let newProduct = async (req, res) => {
         if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
             return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from productImage" })
 
-         productImage = await uploadFile.uploadFile(files[0])
+        productImage = await uploadFile.uploadFile(files[0])
 
         availableSizes = availableSizes.split(",")
-        console.log(availableSizes)
+        
         for (let i = 0; i < availableSizes.length; i++) {
             if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i]))
                 return res.status(400).send({ status: false, message: "AVAILABLE SIZE CAN BE S,XS,M,X,L,XXL,XL" })
@@ -71,15 +74,15 @@ let getProducts = async (req, res) => {
     try {
         const { size, name, priceGreaterThan, priceLessThan } = req.query
         let filters = {}
-        console.log(size)
-        if(size||size==""){
-        if (!isValid(size)) {
-            return res.status(400).send({ status: false, message: "WRONG INPUT" })
-
-        }
         
-        filters.availableSizes = size.split(' ')
-    }
+        if (size || size == "") {
+            if (!isValid(size)) {
+                return res.status(400).send({ status: false, message: "WRONG INPUT" })
+
+            }
+
+            filters.availableSizes = size.split(' ')
+        }
 
         console.log(filters)
         if (isValid(name)) {
@@ -159,10 +162,10 @@ let updateByIDProduct = async (req, res) => {
             return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
         const product = {}
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage,...other } = requestBody
-       
-        if(isValidRequestBody(other))
-        return res.status(400).send({status:false,message:"Any extra field is not allowed for updation"})
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, ...other } = requestBody
+
+        if (isValidRequestBody(other))
+            return res.status(400).send({ status: false, message: "Any extra field is not allowed for updation" })
         let files = req.files
 
         if (productImage != undefined)
