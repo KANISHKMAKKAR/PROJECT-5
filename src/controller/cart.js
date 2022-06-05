@@ -69,7 +69,7 @@ const product = cartDeatil.items.find((element)=> element.productId==productId)
       const product = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: UserId }, { $inc: { "items.$.quantity": 1, totalPrice: ProductDeatil.price } }, { new: true })
 
 
-      return res.status(201).send({ status: false, message: "Successfully created", data: product })
+      return res.status(201).send({ status: true, message: "Successfully created", data: product })
     }
   }}catch(err){
     res.status(500).send({status:false,message:err.message})
@@ -149,7 +149,7 @@ const getCart = async (req, res) => {
     if(!cartDeatil)
     return res.status(400).send({status:false,message:"No cart exist with provided userId"})
 
-    res.status(200).send({ status: false, message: "Success", data: cartDeatil })
+    res.status(200).send({ status: true, message: "Success", data: cartDeatil })
   }
   catch (error) {
     res.status(500).send({ status: false, message: error.message })
